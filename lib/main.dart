@@ -1,6 +1,17 @@
+import 'package:chat_app/screens/chat.dart';
+import 'package:chat_app/screens/splash.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:chat_app/screens/auth.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding
+      .ensureInitialized(); //uygulama goruntu vermezse islenecek kod
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const App());
 }
 
@@ -14,8 +25,21 @@ class App extends StatelessWidget {
       theme: ThemeData().copyWith(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 63, 171, 177)),
+            seedColor: const Color.fromARGB(255, 63, 17, 177)),
       ),
+      home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (ctx, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              //firebase yuklenene kadar gecen suredeki bekleme icin olusturulan ekran
+              return const SplashScreen();
+            }
+
+            if (snapshot.hasData) {
+              return const ChatScreen();
+            }
+            return const AuthScreen();
+          }),
     );
   }
 }
